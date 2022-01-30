@@ -36,25 +36,22 @@ int main(int argc, char const *argv[])
     else if (fork_pid == 0)
     {
         pipe(arg->io_child);
-        dup2(arg->io_child[1], 0);
-        dup2(arg->io_child[0], 1);
-        arg->io_child[1] = fcntl(arg->io_child[1], F_SETFD, 0);
-        arg->io_child[0] = fcntl(arg->io_child[0], F_SETFD, 0);
         execve(arg->command, argve, envp);
+        exit(0);
     }else
-    {   
-        char *com = "2**4\n";
-        for(int i = 0; i < strlen(com); ++i)
-        {
-            write(arg->io_child[1], &com[i], sizeof(com[i]));
-        }
-        while ((rbytes = read(arg->io_child[0], &buffer[nbytes], sizeof(buffer[nbytes]))) > 0){
+    { 
+        sleep(2); 
+        char *com = "2**3\n";
+        write(arg->io_child[0], com, sizeof(com));
+        while ((rbytes = read(arg->io_child[1], &buffer[nbytes], sizeof(buffer[nbytes]))) > 0){
             nbytes++;
             buffer = (char *)realloc(buffer, nbytes+1); 
         }
         printf("nbytes = %d\n", nbytes);
+	    for(int i = 0; i < nbytes; i++)
+            sprintf(&buffer[i], "%c", buffer[i]);
 	    buffer[nbytes+1] = '\0';  
-	    printf("%s", buffer);
+        printf("%s", buffer);
     }
     close(arg->io_child[1]);
     close(arg->io_child[0]);
